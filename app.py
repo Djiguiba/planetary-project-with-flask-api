@@ -10,9 +10,9 @@ app = Flask(__name__)
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'planets.db')
 app.config['JWT_SECRET_KEY'] = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzEzMTY4MiwianRpIjoiZjA5YmZiNDgtNzFkMS00NzNmLWI4ZWUtM2UzZDU0Y2JlYTU2IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6InNvcm9AdGVzdC5jb20iLCJuYmYiOjE3MjMxMzE2ODIsImNzcmYiOiI4ODcwMTc3MS04ZmU2LTQxZjYtYjgwNi0yNDkyM2E1Zjc5NTUiLCJleHAiOjE3MjMxMzI1ODJ9.x8jX5SzZ976gsaSrp--LRHbbxPqb208OCbQ_L4A1e98'
-# app.config['MAIL_SERVER'] = ''
-# app.config['MAIL_USERNAME'] = os.environ['MAIL_USERNAME']
-# app.config['MAIL_PASSWORD'] = os.environ['MAIL_PASSWORD']
+app.config['MAIL_SERVER'] = 'sandbox.smtp.mailtrap.io'
+app.config['MAIL_USERNAME'] = os.environ['MAIL_USERNAME']
+app.config['MAIL_PASSWORD'] = os.environ['MAIL_PASSWORD']
 
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
@@ -179,6 +179,19 @@ def login():
         return jsonify(message='Login succeedeed !.', access_token= access_token)
     else:
         return jsonify(message='Bad password or email !.'), 401
+    
+
+@app.route('/retrieve_password/<string:email>', methods=['GET'])
+def retrieve_password(email: str):
+    user = User.query.filter_by(email=email).first()
+    if user:
+        msg = Message(subject= f'Your password is {user.password}',
+                      sender= 'admin-planetary@test.com',
+                      recipients= [email])
+        mail.send(msg)
+        return jsonify(message='Email sent successfully !.')
+    else:
+        return jsonify(message='That email does not exist !.'), 401
 
 
 @app.route('/')
