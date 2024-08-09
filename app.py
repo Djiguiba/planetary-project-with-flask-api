@@ -188,7 +188,10 @@ def retrieve_password(email: str):
         msg = Message(subject= f'Your password is {user.password}',
                       sender= 'admin-planetary@test.com',
                       recipients= [email])
-        mail.send(msg)
+        ## Chunk of code to attach a file to a message
+        # with app.open_resource('Luffy.jpg') as fp:
+        #     msg.attach('Luffy.jpg', 'Luffy/jpg', fp.read())
+        # mail.send(msg)
         return jsonify(message='Email sent successfully !.')
     else:
         return jsonify(message='That email does not exist !.'), 401
